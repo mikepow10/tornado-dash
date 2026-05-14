@@ -1,0 +1,123 @@
+[
+  {
+    "ticker": "NVDA",
+    "optType": "C",
+    "strike": 260.0,
+    "expiry": "Jan-15",
+    "qty": 3,
+    "entry": 12.11,
+    "dte": 260,
+    "bucket": "Foundation LEAP",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "MSFT",
+    "optType": "C",
+    "strike": 420.0,
+    "expiry": "Jun-18",
+    "qty": 1,
+    "entry": 15.53,
+    "dte": 48,
+    "bucket": "Foundation",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "ET",
+    "optType": "C",
+    "strike": 21.0,
+    "expiry": "Jun-12",
+    "qty": 50,
+    "entry": 0.06,
+    "dte": 36,
+    "bucket": "Foundation BX",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "NVDA",
+    "optType": "C",
+    "strike": 205.0,
+    "expiry": "Jun-18",
+    "qty": 1,
+    "entry": 9.7,
+    "dte": 48,
+    "bucket": "Ladder",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "MCHP",
+    "optType": "C",
+    "strike": 115.0,
+    "expiry": "Jun-18",
+    "qty": 5,
+    "entry": 1.33,
+    "dte": 42,
+    "bucket": "Ladder",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "APA",
+    "optType": "C",
+    "strike": 38.0,
+    "expiry": "Jun-26",
+    "qty": 1,
+    "entry": 2.2,
+    "dte": 45,
+    "bucket": "Rotation",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "JOBY",
+    "optType": "C",
+    "strike": 12.0,
+    "expiry": "Jun-5",
+    "qty": 7,
+    "entry": 0.53,
+    "dte": 23,
+    "bucket": "Skim",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "JOBY",
+    "optType": "C",
+    "strike": 11.0,
+    "expiry": "Jun-5",
+    "qty": 3,
+    "entry": 0.92,
+    "dte": 23,
+    "bucket": "Skim",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "TSLA",
+    "optType": "C",
+    "strike": 490.0,
+    "expiry": "Jun-18",
+    "qty": 1,
+    "entry": 12.77,
+    "dte": 38,
+    "bucket": "Lottery",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "MCHP",
+    "optType": "C",
+    "strike": 125.0,
+    "expiry": "Jun-18",
+    "qty": 3,
+    "entry": 1.28,
+    "dte": 42,
+    "bucket": "Lottery",
+    "updated": "May 14, 01:31 PM"
+  },
+  {
+    "ticker": "SPY",
+    "optType": "P",
+    "strike": 670.0,
+    "expiry": "Jul-17",
+    "qty": 1,
+    "entry": 5.75,
+    "dte": 66,
+    "bucket": "Hedge",
+    "updated": "May 14, 01:31 PM"
+  }
+]

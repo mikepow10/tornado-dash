@@ -1,6 +1,5 @@
 // ─── CONFIG ───────────────────────────────────────────────
-const SHEET_ID = '1G2TBfd_XX3oFKu_KVKJmhVsgt_Os82DqheNFqWzHlZ0';
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv';
+const DATA_URL = 'data.json';
 const REFRESH_MS = 30000;
 
 // Colors per bucket
@@ -39,39 +38,22 @@ function parseDollar(s) {
   return parseFloat(String(s).replace(/[$,]/g,'')) || 0;
 }
 
-function parseCSV(text) {
-  var lines = text.split('\n').filter(function(l) { return l.trim(); });
-  if (lines.length < 2) return [];
-  var result = [];
-  for (var i = 1; i < lines.length; i++) {
-    var vals = [];
-    var cur = '', inQuote = false;
-    for (var j = 0; j < lines[i].length; j++) {
-      var ch = lines[i][j];
-      if (ch === '"') { inQuote = !inQuote; continue; }
-      if (ch === ',' && !inQuote) { vals.push(cur.trim()); cur = ''; continue; }
-      cur += ch;
-    }
-    vals.push(cur.trim());
-    result.push(vals);
-  }
-  return result;
-}
+
 
 function getBucketColor(b) {
   return BUCKET_COLORS[b] || '#888';
 }
 
 // ─── GOOGLE SHEETS FETCH ─────────────────────────────────
-function fetchSheetCSV(sheetName) {
-  return fetch(CSV_URL + '&sheet=' + encodeURIComponent(sheetName) + '&_cb=' + Date.now(), { cache: 'no-store' })
+function fetchDataJSON() {
+  return fetch(DATA_URL + '?_cb=' + Date.now(), { cache: 'no-store' })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.text();
+      return r.json();
     })
     .catch(function(e) {
-      console.warn('Sheet fetch failed for ' + sheetName + ':', e);
-      return '';
+      console.warn('data.json fetch failed:', e);
+      return [];
     });
 }
 
@@ -117,19 +99,22 @@ function fetchAllPrices(tickers) {
   return nextBatch();
 }
 
-// ─── PARSE POSITIONS ──────────────────────────────────────
-function parsePositions(csvText) {
-  var rows = parseCSV(csvText);
-  return rows.map(function(r) {
-    var ticker = esc(r[0] || '');
-    var optType = esc(r[1] || 'C');
-    var strike = parseDollar(r[2]);
-    var expiry = esc(r[3] || '');
-    var qty = parseInt(r[4]) || 0;
-    var entry = parseDollar(r[5]);
-    var dte = parseInt(r[9]) || 0;
-    var bucket = esc(r[10] || '');
-    return { ticker: ticker, optType: optType, strike: strike, expiry: expiry, qty: qty, entry: entry, cost: entry * qty * 100, dte: dte, bucket: bucket, stockPrice: null };
+// ─── PARSE POSITIONS FROM JSON ───────────────────────────
+function parsePositions(json) {
+  if (!json || !json.length) return [];
+  return json.map(function(p) {
+    return {
+      ticker: esc(p.ticker || ''),
+      optType: esc(p.optType || 'C'),
+      strike: parseFloat(p.strike) || 0,
+      expiry: esc(p.expiry || ''),
+      qty: parseInt(p.qty) || 0,
+      entry: parseFloat(p.entry) || 0,
+      cost: (parseFloat(p.entry) || 0) * (parseInt(p.qty) || 0) * 100,
+      dte: parseInt(p.dte) || 0,
+      bucket: esc(p.bucket || ''),
+      stockPrice: null
+    };
   }).filter(function(p) { return p.ticker; });
 }
 
@@ -291,32 +276,16 @@ function renderTracker() {
 
 // ─── MAIN UPDATE ──────────────────────────────────────────
 function updateAll() {
-  var posPromise = fetchSheetCSV('Portfolio Quick');
-  var sigPromise = fetchSheetCSV('Skim Quick');
+  var posPromise = fetchDataJSON();
 
-  return Promise.all([posPromise, sigPromise])
-    .then(function(results) {
-      var posCSV = results[0];
-      var sigCSV = results[1];
-
-      if (posCSV) {
-        positions = parsePositions(posCSV);
+  return posPromise
+    .then(function(json) {
+      if (json && json.length) {
+        positions = parsePositions(json);
         positions.sort(function(a, b) {
           return BUCKET_ORDER.indexOf(a.bucket) - BUCKET_ORDER.indexOf(b.bucket) || b.cost - a.cost;
         });
         buckets = computeBuckets(positions);
-      }
-      if (sigCSV) {
-        var rows = parseCSV(sigCSV);
-        signals = rows.map(function(r) {
-          return {
-            ticker: esc(r[0] || ''),
-            urgency: parseInt(String(r[1] || '').split('/')[0]) || 0,
-            optType: esc(r[2] || 'C'), strike: parseDollar(r[3]),
-            expiry: esc(r[4] || ''), action: esc(r[5] || ''),
-            entryPrice: parseDollar(r[6] || ''), zone: esc(r[7] || '')
-          };
-        }).filter(function(s) { return s.ticker && s.urgency > 0; });
       }
 
       // Fetch stock prices
@@ -341,7 +310,6 @@ function updateAll() {
       }
 
       $('lastUpdated').textContent = nowStr();
-      $('signalsUpdated').textContent = nowStr();
       $('trackerUpdated').textContent = nowStr();
       $('liveDot').className = 'live-dot';
     })
