@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Tornado</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌀</text></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Settings Panel -->
+<div id="settingsView" class="hide">
+  <div class="header"><h1>&#x2699;&#xFE0F; Settings</h1></div>
+  <div class="card">
+    <div class="card-header">API Keys</div>
+    <div class="settings-section">
+      <div class="setting-label">Finnhub API Key</div>
+      <input class="setting-input" id="finnhubKeyInput" type="text" placeholder="Paste your finnhub.io API key" autocomplete="off">
+      <div class="setting-hint">Free from finnhub.io/register &#x2014; no credit card, works in Canada</div>
+      <button class="btn" id="saveApiKeyBtn">Save</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">About</div>
+    <div class="settings-section" style="font-size:12px;color:var(--dim);line-height:1.6">
+      Tornado Web Dashboard v1.0.0<br>
+      Data refreshes every 30 seconds.<br>
+      Positions from Google Sheets &#xb7; Prices from Finnhub
+    </div>
+  </div>
+</div>
+
+<div id="tabsContent">
+<!-- Portfolio -->
+<div id="portfolioTab" class="tab-content">
+  <div class="header">
+    <h1>&#x1F300; Tornado</h1>
+    <div class="header-right"><span class="live-dot" id="liveDot"></span><span class="last-updated" id="lastUpdated">&#x2014;</span></div>
+  </div>
+  <div id="portfolioContent"><div class="loading"><div class="spinner"></div>Loading positions...</div></div>
+</div>
+
+<!-- Signals -->
+<div id="signalsTab" class="tab-content hide">
+  <div class="header"><h1>&#x26A1; Signals</h1><div class="header-right"><span class="last-updated" id="signalsUpdated">&#x2014;</span></div></div>
+  <div id="signalsContent"><div class="loading"><div class="spinner"></div>Loading signals...</div></div>
+</div>
+
+<!-- Tracker -->
+<div id="trackerTab" class="tab-content hide">
+  <div class="header"><h1>&#x1F4C8; Tracker</h1><div class="header-right"><span class="last-updated" id="trackerUpdated">&#x2014;</span></div></div>
+  <div id="trackerContent"><div class="loading"><div class="spinner"></div>Loading prices...</div></div>
+</div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="tabs" id="tabNav">
+  <div class="tab active" data-tab="portfolio"><div class="tab-icon">&#x1F4CA;</div><div class="tab-label">Portfolio</div></div>
+  <div class="tab" data-tab="signals"><div class="tab-icon">&#x26A1;</div><div class="tab-label">Signals</div></div>
+  <div class="tab" data-tab="tracker"><div class="tab-icon">&#x1F4C8;</div><div class="tab-label">Tracker</div></div>
+  <div class="tab" data-tab="settings"><div class="tab-icon">&#x2699;&#xFE0F;</div><div class="tab-label">Settings</div></div>
+</nav>
+
+<script src="app.js?v=2"></script>
+</body>
+</html>
