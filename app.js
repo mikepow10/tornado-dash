@@ -1,5 +1,6 @@
 // ─── CONFIG ───────────────────────────────────────────────
 const DATA_URL = 'data.json';
+const SIGNALS_URL = 'https://docs.google.com/spreadsheets/d/1G2TBfd_XX3oFKu_KVKJmhVsgt_Os82DqheNFqWzHlZ0/gviz/tq?tqx=out:csv&sheet=Skim%20Quick';
 const REFRESH_MS = 30000;
 
 // Colors per bucket
@@ -55,6 +56,37 @@ function fetchDataJSON() {
       console.warn('data.json fetch failed:', e);
       return [];
     });
+}
+
+function fetchSignalsCSV() {
+  return fetch(SIGNALS_URL + '&_cb=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .catch(function(e) {
+      console.warn('Signals CSV fetch failed:', e);
+      return '';
+    });
+}
+
+function parseCSV(text) {
+  var lines = text.split('\n').filter(function(l) { return l.trim(); });
+  if (lines.length < 2) return [];
+  var result = [];
+  for (var i = 1; i < lines.length; i++) {
+    var vals = [];
+    var cur = '', inQuote = false;
+    for (var j = 0; j < lines[i].length; j++) {
+      var ch = lines[i][j];
+      if (ch === '"') { inQuote = !inQuote; continue; }
+      if (ch === ',' && !inQuote) { vals.push(cur.trim()); cur = ''; continue; }
+      cur += ch;
+    }
+    vals.push(cur.trim());
+    result.push(vals);
+  }
+  return result;
 }
 
 // ─── FINNHUB PRICE FETCH ──────────────────────────────────
@@ -276,16 +308,30 @@ function renderTracker() {
 
 // ─── MAIN UPDATE ──────────────────────────────────────────
 function updateAll() {
-  var posPromise = fetchDataJSON();
+  return Promise.all([fetchDataJSON(), fetchSignalsCSV()])
+    .then(function(results) {
+      var json = results[0];
+      var sigCSV = results[1];
 
-  return posPromise
-    .then(function(json) {
       if (json && json.length) {
         positions = parsePositions(json);
         positions.sort(function(a, b) {
           return BUCKET_ORDER.indexOf(a.bucket) - BUCKET_ORDER.indexOf(b.bucket) || b.cost - a.cost;
         });
         buckets = computeBuckets(positions);
+      }
+
+      if (sigCSV) {
+        var rows = parseCSV(sigCSV);
+        signals = rows.map(function(r) {
+          return {
+            ticker: esc(r[0] || ''),
+            urgency: parseInt(String(r[1] || '').split('/')[0]) || 0,
+            optType: esc(r[2] || 'C'), strike: parseDollar(r[3]),
+            expiry: esc(r[4] || ''), action: esc(r[5] || ''),
+            entryPrice: parseDollar(r[6] || ''), zone: esc(r[7] || '')
+          };
+        }).filter(function(s) { return s.ticker && s.urgency > 0; });
       }
 
       // Fetch stock prices
@@ -310,6 +356,7 @@ function updateAll() {
       }
 
       $('lastUpdated').textContent = nowStr();
+      $('signalsUpdated').textContent = nowStr();
       $('trackerUpdated').textContent = nowStr();
       $('liveDot').className = 'live-dot';
     })
