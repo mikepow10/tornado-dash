@@ -64,7 +64,7 @@ function getBucketColor(b) {
 
 // ─── GOOGLE SHEETS FETCH ─────────────────────────────────
 function fetchSheetCSV(sheetName) {
-  return fetch(CSV_URL + '&sheet=' + encodeURIComponent(sheetName), { cache: 'no-store' })
+  return fetch(CSV_URL + '&sheet=' + encodeURIComponent(sheetName) + '&_cb=' + Date.now(), { cache: 'no-store' })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.text();
