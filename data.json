@@ -8,7 +8,7 @@
     "entry": 12.11,
     "dte": 260,
     "bucket": "Foundation LEAP",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "MSFT",
@@ -19,7 +19,29 @@
     "entry": 15.53,
     "dte": 48,
     "bucket": "Foundation",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
+  },
+  {
+    "ticker": "ASTS",
+    "optType": "C",
+    "strike": 80.0,
+    "expiry": "Jun-18",
+    "qty": 1,
+    "entry": 8.18,
+    "dte": 35,
+    "bucket": "Foundation",
+    "updated": "May 14, 03:35 PM"
+  },
+  {
+    "ticker": "ET",
+    "optType": "C",
+    "strike": 21.0,
+    "expiry": "Jun-18",
+    "qty": 15,
+    "entry": 0.26,
+    "dte": 35,
+    "bucket": "Foundation BX",
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "ET",
@@ -30,7 +52,7 @@
     "entry": 0.06,
     "dte": 36,
     "bucket": "Foundation BX",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "NVDA",
@@ -41,18 +63,7 @@
     "entry": 9.7,
     "dte": 48,
     "bucket": "Ladder",
-    "updated": "May 14, 01:31 PM"
-  },
-  {
-    "ticker": "MCHP",
-    "optType": "C",
-    "strike": 115.0,
-    "expiry": "Jun-18",
-    "qty": 5,
-    "entry": 1.33,
-    "dte": 42,
-    "bucket": "Ladder",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "APA",
@@ -63,7 +74,7 @@
     "entry": 2.2,
     "dte": 45,
     "bucket": "Rotation",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "JOBY",
@@ -74,7 +85,7 @@
     "entry": 0.53,
     "dte": 23,
     "bucket": "Skim",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "JOBY",
@@ -85,7 +96,7 @@
     "entry": 0.92,
     "dte": 23,
     "bucket": "Skim",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "TSLA",
@@ -96,7 +107,7 @@
     "entry": 12.77,
     "dte": 38,
     "bucket": "Lottery",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "MCHP",
@@ -107,7 +118,7 @@
     "entry": 1.28,
     "dte": 42,
     "bucket": "Lottery",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   },
   {
     "ticker": "SPY",
@@ -118,6 +129,6 @@
     "entry": 5.75,
     "dte": 66,
     "bucket": "Hedge",
-    "updated": "May 14, 01:31 PM"
+    "updated": "May 14, 03:35 PM"
   }
 ]
