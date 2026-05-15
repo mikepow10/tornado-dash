@@ -495,64 +495,89 @@ function renderTracker() {
 
 // ─── MAIN UPDATE ──────────────────────────────────────────
 function updateAll() {
-  return Promise.all([fetchDataJSON(), fetchSignalsCSV(), fetchAgendaJSON()])
-    .then(function(results) {
-      var json = results[0];
-      var sigCSV = results[1];
-      agendaItems = results[2];
+  // Step 1: Fetch portfolio data.json (fast — GitHub Pages) → render immediately
+  fetchDataJSON().then(function(json) {
+    if (json && json.length) {
+      positions = parsePositions(json);
+      positions.sort(function(a, b) {
+        return BUCKET_ORDER.indexOf(a.bucket) - BUCKET_ORDER.indexOf(b.bucket) || b.cost - a.cost;
+      });
+      buckets = computeBuckets(positions);
+      renderAllTabs();
+    }
+  });
 
-      if (json && json.length) {
-        positions = parsePositions(json);
-        positions.sort(function(a, b) {
-          return BUCKET_ORDER.indexOf(a.bucket) - BUCKET_ORDER.indexOf(b.bucket) || b.cost - a.cost;
-        });
-        buckets = computeBuckets(positions);
-      }
+  // Step 2: Fetch signals + agenda + prices in parallel (background, no blocking)
+  Promise.all([fetchSignalsCSV(), fetchAgendaJSON()]).then(function(results) {
+    var sigCSV = results[0];
+    var agenda = results[1];
 
-      if (sigCSV) {
-        var rows = parseCSV(sigCSV);
-        signals = rows.map(function(r) {
-          return {
-            ticker: esc(r[0] || ''),
-            urgency: parseInt(String(r[1] || '').split('/')[0]) || 0,
-            optType: esc(r[2] || 'C'), strike: parseDollar(r[3]),
-            expiry: esc(r[4] || ''), action: esc(r[5] || ''),
-            entryPrice: parseDollar(r[6] || ''), zone: esc(r[7] || '')
-          };
-        }).filter(function(s) { return s.ticker && s.urgency > 0; });
-      }
+    // Parse signals
+    if (sigCSV) {
+      var rows = parseCSV(sigCSV);
+      signals = rows.map(function(r) {
+        return {
+          ticker: esc(r[0] || ''),
+          urgency: parseInt(String(r[1] || '').split('/')[0]) || 0,
+          optType: esc(r[2] || 'C'), strike: parseDollar(r[3]),
+          expiry: esc(r[4] || ''), action: esc(r[5] || ''),
+          entryPrice: parseDollar(r[6] || ''), zone: esc(r[7] || '')
+        };
+      }).filter(function(s) { return s.ticker && s.urgency > 0; });
+    }
 
-      // Fetch stock prices
-      var tickers = [];
-      positions.forEach(function(p) { if (p.ticker && tickers.indexOf(p.ticker) === -1) tickers.push(p.ticker); });
-      if (finnhubKey && tickers.length) {
-        return fetchAllPrices(tickers).then(function(prices) {
-          stockPrices = prices;
-        });
-      } else {
-        stockPrices = {};
-      }
-    })
-    .then(function() {
-      // Render active tab
-      var active = document.querySelector('.tab.active');
-      if (active) {
-        var tab = active.getAttribute('data-tab');
-        if (tab === 'portfolio') renderPortfolio();
-        else if (tab === 'signals') renderSignals();
-        else if (tab === 'tracker') renderTracker();
-        else if (tab === 'agenda') renderAgenda();
-      }
+    // Parse agenda
+    if (agenda && agenda.length) {
+      agendaItems = agenda;
+    }
 
-      $('lastUpdated').textContent = nowStr();
-      $('signalsUpdated').textContent = nowStr();
-      $('trackerUpdated').textContent = nowStr();
+    // Re-render if on signals or agenda tab
+    renderAllTabs();
+  }).catch(function(e) {
+    console.warn('Signals/agenda fetch error:', e);
+  });
+
+  // Step 3: Fetch stock prices in background
+  fetchAndRenderPrices();
+}
+
+function fetchAndRenderPrices() {
+  if (!positions.length) return;
+  var tickers = [];
+  positions.forEach(function(p) { if (p.ticker && tickers.indexOf(p.ticker) === -1) tickers.push(p.ticker); });
+  if (finnhubKey && tickers.length) {
+    fetchAllPrices(tickers).then(function(prices) {
+      stockPrices = prices;
+      renderAllTabs();
       $('liveDot').className = 'live-dot';
-    })
-    .catch(function(e) {
-      console.error('Update error:', e);
-      $('liveDot').className = 'live-dot off';
     });
+  } else {
+    stockPrices = {};
+    $('liveDot').className = 'live-dot';
+  }
+}
+
+function renderAllTabs() {
+  // Don't overwrite spinners if data hasn't loaded yet
+  if (!positions.length && !signals.length && !agendaItems.length) return;
+  
+  var active = document.querySelector('.tab.active');
+  if (active) {
+    var tab = active.getAttribute('data-tab');
+    if (tab === 'portfolio') renderPortfolio();
+    else if (tab === 'signals') renderSignals();
+    else if (tab === 'tracker') renderTracker();
+    else if (tab === 'agenda') renderAgenda();
+  }
+  updateTimestamps();
+}
+
+function updateTimestamps() {
+  var ts = nowStr();
+  $('lastUpdated').textContent = ts;
+  $('signalsUpdated').textContent = ts;
+  $('trackerUpdated').textContent = ts;
+  $('agendaUpdated').textContent = ts;
 }
 
 // ─── TABS ──────────────────────────────────────────────────
