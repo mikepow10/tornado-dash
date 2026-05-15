@@ -200,63 +200,6 @@ function computeBuckets(positions) {
     .sort(function(a, b) { return b.capital - a.capital; });
 }
 
-// ─── INTRODAY SPARKLINES ────────────────────────────────
-function fetchFinIntraday(ticker) {
-  if (!finnhubKey) return Promise.resolve(null);
-  var now = Math.floor(Date.now() / 1000);
-  var from = now - 86400; // 24 hours ago — captures full trading day
-  return fetch('https://finnhub.io/api/v1/stock/candle?symbol=' + ticker + '&resolution=5&from=' + from + '&to=' + now + '&token=' + finnhubKey, { cache: 'no-store' })
-    .then(function(r) { if (!r.ok) return null; return r.json(); })
-    .then(function(d) { return (d && d.s === 'ok' && d.c && d.c.length > 1) ? d.c : null; })
-    .catch(function() { return null; });
-}
-
-function fetchAllIntraday(tickers) {
-  var unique = tickers.filter(function(t) { return t; });
-  var seen = {};
-  unique = unique.filter(function(t) { return seen[t] ? false : (seen[t] = true); });
-  var results = {};
-  var pending = 0;
-  var done = false;
-  return new Promise(function(resolve) {
-    unique.forEach(function(t, i) {
-      setTimeout(function() {
-        fetchFinIntraday(t).then(function(prices) {
-          if (prices) results[t] = prices;
-          pending++;
-          if (pending >= unique.length && !done) { done = true; resolve(results); }
-        }).catch(function() {
-          pending++;
-          if (pending >= unique.length && !done) { done = true; resolve(results); }
-        });
-      }, i * 200); // stagger 200ms apart
-    });
-    if (!unique.length) resolve(results);
-    // Fallback in case all requests hang
-    setTimeout(function() { if (!done) { done = true; resolve(results); } }, 12000);
-  });
-}
-
-function renderSparkline(prices, w, h) {
-  if (!prices || prices.length < 2) return '';
-  var min = prices[0], max = prices[0];
-  for (var i = 1; i < prices.length; i++) {
-    if (prices[i] < min) min = prices[i];
-    if (prices[i] > max) max = prices[i];
-  }
-  var range = max - min || 1;
-  w = w || 70;
-  h = h || 22;
-  var pts = [];
-  for (var i = 0; i < prices.length; i++) {
-    var x = (i / (prices.length - 1)) * w;
-    var y = h - ((prices[i] - min) / range) * (h - 4) - 2;
-    pts.push(x.toFixed(1) + ',' + y.toFixed(1));
-  }
-  var c = prices[prices.length - 1] >= prices[0] ? '#34c759' : '#ff4444';
-  return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" class="sparkline"><polyline fill="none" stroke="' + c + '" stroke-width="1.5" points="' + pts.join(' ') + '"/></svg>';
-}
-
 // ─── RENDER ────────────────────────────────────────────────
 function renderPortfolio() {
   var el = $('portfolioContent');
@@ -576,7 +519,6 @@ function renderTracker() {
         '<div class="price-ticker">' + p.ticker + '</div>' +
         '<div class="price-sub">entry ' + fmt(p.entry) + '</div>' +
       '</div>' +
-      renderSparkline(intradayData[p.ticker], 60, 22) +
       '<div class="price-right">';
     if (cur) {
       html += '<div class="price-current">' + fmt(cur) + '</div>' +
@@ -650,14 +592,8 @@ function fetchAndRenderPrices() {
       renderAllTabs();
       $('liveDot').className = 'live-dot';
     });
-    // Fetch intraday data for sparklines (background, non-blocking)
-    fetchAllIntraday(tickers).then(function(data) {
-      intradayData = data;
-      renderAllTabs();
-    }).catch(function() {});
   } else {
     stockPrices = {};
-    intradayData = {};
     $('liveDot').className = 'live-dot';
   }
 }
