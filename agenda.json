@@ -1,0 +1,65 @@
+[
+  {
+    "title": "Sell MSFT $420c Jun 18",
+    "thesis": "MSFT position is stalling with no Foundation thesis. Stock at $408, ~$12 below the $420 strike with 35 DTE. Position is ~$800 underwater with no catalyst ahead — MSFT earnings already passed Apr 29. Free up ~$700 in capital to redeploy into the NVDA earnings play which has a defined catalyst and exit. The Foundation thesis was weak from the start; cutting losses early redeploys capital into a trade with real edge.",
+    "priority": "HIGH",
+    "category": "Close Position",
+    "status": "Pending",
+    "created": "May 14",
+    "ticker": "MSFT"
+  },
+  {
+    "title": "Buy NVDA $250c May 29 + $220p May 29",
+    "thesis": "Pre-earnings skim with built-in hedge. NVDA at $237.86 with earnings May 20 (6 days out). Strong momentum (+6.8% 5d, +13.2% 10d) in a RISK-ON regime (SPMO beating SPY by 3.6%). $250c (~$5.65) captures the earnings gap-up potential. $220p (~$4.10) protects the ~$4.7k NVDA LEAP book (3 LEAPs + Ladder). Total outlay ~$975. Exit both Wednesday May 21 at open to avoid IV crush + theta decay post-earnings. Sell the call for profit, sell the put whether it prints or not — the hedge was the insurance cost.",
+    "priority": "HIGH",
+    "category": "Open Position",
+    "status": "Pending",
+    "created": "May 14",
+    "ticker": "NVDA"
+  },
+  {
+    "title": "Add NVDA Foundation LEAPs (2× $260c Jan '27)",
+    "thesis": "Long-term plan: add 2 more NVDA $260c Jan 2027 LEAPs at end of May. Already have 3 contracts (avg $12.11). Target entry below $204 stock price (Iran dip entry). Long-term target: 15-20 contracts by H2 2026, ~$100k profit target at NVDA $350-500. Ladder in on weakness — scale, don't force.",
+    "priority": "MEDIUM",
+    "category": "Open Position",
+    "status": "Pending",
+    "created": "May 14",
+    "ticker": "NVDA"
+  },
+  {
+    "title": "Track ASTS $80c Jun 18 Foundation play",
+    "thesis": "ASTS entered as Foundation at $8.18 ($818 total). FCC 248-satellite approval thesis is a multi-month catalyst. 35 DTE is shorter than ideal for Foundation (prefers 60-90 DTE), so monitor closely. Breakeven $88.18. Entry triggered because ASTS was pulling back to support. Monitor post-earnings for any FCC news.",
+    "priority": "MEDIUM",
+    "category": "Monitor",
+    "status": "In Progress",
+    "created": "May 14",
+    "ticker": "ASTS"
+  },
+  {
+    "title": "Set up Finnhub API key for live prices",
+    "thesis": "Web dashboard needs a Finnhub API key for live stock price display in Settings tab. Sign up at finnhub.io (free tier available — watch for rate limits). Once configured, Skim Quick and Buy Signals will show real-time prices instead of stale end-of-day data. This makes the web dashboard far more useful for pre-market and intraday scanning.",
+    "priority": "MEDIUM",
+    "category": "Setup",
+    "status": "Pending",
+    "ticker": null,
+    "created": "May 14"
+  },
+  {
+    "title": "Evaluate paid option pricing API (Intrinio)",
+    "thesis": "To enable live option bid/ask prices in the iOS portfolio detail card (DTE, mid price, P&L on tap), a paid API is needed. Nasdaq API provided unreliable option pricing ($2.10 vs $18.10 actual for ASTS $80c Sep 18 — 9x error). Intrinio ~$20/mo. Without this, portfolio P&L tracking is limited to stock reference only. Worth evaluating once the portfolio grows beyond $10k.",
+    "priority": "LOW",
+    "category": "Setup",
+    "status": "Pending",
+    "ticker": null,
+    "created": "May 14"
+  },
+  {
+    "title": "Add portfolio position detail card (DTE, mid price, P&L)",
+    "thesis": "When tapping a position name in the Portfolio tab, a detail card should open showing: DTE, current option mid price (needs Intrinio), performance since bought (P&L). Data exists in the Position model (lastPrice, pnlDollars, pnlPercent, dte) but is incomplete without live option pricing. Can implement the card now with stock reference data and add option pricing later.",
+    "priority": "LOW",
+    "category": "App Feature",
+    "status": "Pending",
+    "ticker": null,
+    "created": "May 14"
+  }
+]
