@@ -360,7 +360,7 @@ function renderAgenda() {
     var statIcon = (a.status || '').toLowerCase() === 'complete' ? '\u2713' :
                    (a.status || '').toLowerCase() === 'cancelled' ? '\u2717' : '\u25CB';
     
-    html += '<div class="agenda-item" onclick="openAgendaDetail(' + i + ',\' + (agendaFilter || 'all') + ')">' +
+    html += '<div class="agenda-item" onclick="openAgendaDetail(' + i + ')">' +
       '<div class="agenda-priority-bar" style="background:' + prioColor + '"></div>' +
       '<div class="agenda-body">' +
         '<div class="agenda-top">' +
@@ -390,10 +390,10 @@ function setAgendaFilter(prio) {
   renderAgenda();
 }
 
-function openAgendaDetail(idx, filterTag) {
-  // Find the actual agenda item from the source
-  var filtered = filterTag !== 'all'
-    ? agendaItems.filter(function(a) { return (a.priority || '').toUpperCase() === (filterTag || '').toUpperCase(); })
+function openAgendaDetail(idx) {
+  // Find the actual agenda item using the current filter
+  var filtered = agendaFilter
+    ? agendaItems.filter(function(a) { return (a.priority || '').toUpperCase() === agendaFilter; })
     : agendaItems;
   var a = filtered[idx];
   if (!a) return;
@@ -558,9 +558,6 @@ function fetchAndRenderPrices() {
 }
 
 function renderAllTabs() {
-  // Don't overwrite spinners if data hasn't loaded yet
-  if (!positions.length && !signals.length && !agendaItems.length) return;
-  
   var active = document.querySelector('.tab.active');
   if (active) {
     var tab = active.getAttribute('data-tab');
