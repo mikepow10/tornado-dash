@@ -55,10 +55,14 @@ function openModal(html) {
   document.body.style.overflow = 'hidden';
 }
 
-function closeModal(e) {
-  if (e && e.target !== $('detailModal')) return;
+function hideModal() {
   $('detailModal').classList.add('hide');
   document.body.style.overflow = '';
+}
+
+function closeModal(e) {
+  if (e && e.target !== $('detailModal')) return;
+  hideModal();
 }
 
 // ─── AGENDA FETCH ────────────────────────────────────────
@@ -320,7 +324,7 @@ function openPositionDetail(idx) {
       '</div>' : '') +
     '<div class="modal-divider"></div>' +
     '<div style="display:flex;gap:8px;margin-top:4px">' +
-      '<button class="btn" onclick="closeModal(event)" style="background:rgba(255,255,255,0.06);color:var(--text);font-size:13px">Close</button>' +
+      '<button class="btn" onclick="hideModal()" style="background:rgba(255,255,255,0.06);color:var(--text);font-size:13px">Close</button>' +
     '</div>';
   
   openModal(html);
@@ -416,7 +420,7 @@ function openAgendaDetail(idx) {
     '</div>' +
     '<div class="modal-divider"></div>' +
     '<div style="display:flex;gap:8px;margin-top:4px">' +
-      '<button class="btn" onclick="closeModal(event)" style="background:rgba(255,255,255,0.06);color:var(--text);font-size:13px">Close</button>' +
+      '<button class="btn" onclick="hideModal()" style="background:rgba(255,255,255,0.06);color:var(--text);font-size:13px">Close</button>' +
     '</div>';
   
   openModal(html);
@@ -433,7 +437,7 @@ function renderSignals() {
     var s = signals[si];
     var score = parseInt(s.urgency) || 0;
     var scoreCls = score >= 8 ? 'high' : score >= 5 ? 'med' : 'low';
-    html += '<div class="signal-row">' +
+    html += '<div class="signal-row" onclick="openSignalDetail(' + si + ')">' +
       '<div class="signal-left">' +
         '<div class="signal-score ' + scoreCls + '">' + score + '/10</div>' +
         '<div>' +
@@ -453,6 +457,42 @@ function renderSignals() {
   el.innerHTML = html;
 }
 
+
+// ─── SIGNAL DETAIL MODAL ──────────────────────────────
+function openSignalDetail(idx) {
+  var s = signals[idx];
+  if (!s) return;
+  var score = parseInt(s.urgency) || 0;
+  
+  var html = '' +
+    '<div class="modal-handle"></div>' +
+    '<div class="modal-title">' + s.ticker + '</div>' +
+    '<div class="modal-sub">' + (s.strike ? fmt(s.strike) + s.optType : '') + (s.strike && s.expiry ? ' \xb7 ' : '') + (s.expiry || '') + '</div>' +
+    '<div class="modal-divider"></div>' +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Urgency Score</div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="font-size:24px;font-weight:800;color:' + (score >= 8 ? 'var(--green)' : score >= 5 ? 'var(--orange)' : 'var(--dim)') + '">' + score + '/10</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Recommendation</div>' +
+      '<div class="modal-value" style="color:' + ((s.action || '').toLowerCase() === 'buy' ? 'var(--green)' : 'var(--red)') + '">' + (s.action || '--') + '</div>' +
+    '</div>' +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Zone</div>' +
+      '<div class="modal-value">' + (s.zone || '--') + '</div>' +
+    '</div>' +
+    (s.entryPrice ? '<div class="modal-section">' +
+      '<div class="modal-label">Entry Price</div>' +
+      '<div class="modal-value">' + fmt(s.entryPrice) + '</div>' +
+    '</div>' : '') +
+    '<div class="modal-divider"></div>' +
+    '<button class="btn" onclick="hideModal()" style="background:rgba(255,255,255,0.06);color:var(--text);font-size:13px">Close</button>' +
+  '</div>';
+  
+  openModal(html);
+}
 function renderTracker() {
   var el = $('trackerContent');
   if (!positions.length) {
