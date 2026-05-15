@@ -8,7 +8,7 @@
     "entry": 12.11,
     "dte": 260,
     "bucket": "Foundation LEAP",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "MSFT",
@@ -19,7 +19,7 @@
     "entry": 15.53,
     "dte": 48,
     "bucket": "Foundation",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "ASTS",
@@ -30,7 +30,7 @@
     "entry": 8.18,
     "dte": 35,
     "bucket": "Foundation",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "ET",
@@ -41,7 +41,7 @@
     "entry": 0.26,
     "dte": 35,
     "bucket": "Foundation BX",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "ET",
@@ -52,7 +52,7 @@
     "entry": 0.06,
     "dte": 36,
     "bucket": "Foundation BX",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "NVDA",
@@ -63,7 +63,7 @@
     "entry": 9.7,
     "dte": 48,
     "bucket": "Ladder",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "APA",
@@ -74,7 +74,7 @@
     "entry": 2.2,
     "dte": 45,
     "bucket": "Rotation",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "JOBY",
@@ -85,7 +85,7 @@
     "entry": 0.53,
     "dte": 23,
     "bucket": "Skim",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "JOBY",
@@ -96,7 +96,7 @@
     "entry": 0.92,
     "dte": 23,
     "bucket": "Skim",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "TSLA",
@@ -107,7 +107,7 @@
     "entry": 12.77,
     "dte": 38,
     "bucket": "Lottery",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "MCHP",
@@ -118,7 +118,7 @@
     "entry": 1.28,
     "dte": 42,
     "bucket": "Lottery",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   },
   {
     "ticker": "SPY",
@@ -129,6 +129,6 @@
     "entry": 5.75,
     "dte": 66,
     "bucket": "Hedge",
-    "updated": "May 14, 03:35 PM"
+    "updated": "May 15, 01:21 AM"
   }
 ]

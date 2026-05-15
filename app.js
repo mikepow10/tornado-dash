@@ -1,6 +1,7 @@
 // ─── CONFIG ───────────────────────────────────────────────
 const DATA_URL = 'data.json';
 const SIGNALS_URL = 'https://docs.google.com/spreadsheets/d/1G2TBfd_XX3oFKu_KVKJmhVsgt_Os82DqheNFqWzHlZ0/gviz/tq?tqx=out:csv&sheet=Skim%20Quick';
+const AGENDA_URL = 'agenda.json';
 const REFRESH_MS = 30000;
 
 // Colors per bucket
@@ -18,6 +19,8 @@ var signals = [];
 var buckets = [];
 var finnhubKey = localStorage.getItem('finnhubKey') || '';
 var refreshTimer = null;
+var agendaItems = [];
+var agendaFilter = null;
 
 // ─── UTILITY ──────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
@@ -43,6 +46,32 @@ function parseDollar(s) {
 
 function getBucketColor(b) {
   return BUCKET_COLORS[b] || '#888';
+}
+
+// ─── DETAIL MODAL ────────────────────────────────────────
+function openModal(html) {
+  $('modalContent').innerHTML = html;
+  $('detailModal').classList.remove('hide');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== $('detailModal')) return;
+  $('detailModal').classList.add('hide');
+  document.body.style.overflow = '';
+}
+
+// ─── AGENDA FETCH ────────────────────────────────────────
+function fetchAgendaJSON() {
+  return fetch(AGENDA_URL + '?_cb=' + Date.now(), { cache: 'no-store' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .catch(function(e) {
+      console.warn('agenda.json fetch failed:', e);
+      return [];
+    });
 }
 
 // ─── GOOGLE SHEETS FETCH ─────────────────────────────────
@@ -213,7 +242,7 @@ function renderPortfolio() {
     var mn = stkPrice ? moneyness(stkPrice, p.strike, p.optType) : { label: '--', cls: '' };
     var dteClass = p.dte <= 7 ? 'expired' : p.dte <= 14 ? 'danger' : p.dte <= 21 ? 'warn' : '';
 
-    var posHtml = '<div class="position">' +
+    var posHtml = '<div class="position" onclick="openPositionDetail(' + pi + ')">' +
       '<div>' +
         '<div class="pos-ticker">' + p.ticker + '</div>' +
         '<div class="pos-strike">' + fmt(p.strike) + (p.optType === 'P' ? 'p' : 'c') + ' \xb7 ' + p.expiry + '</div>' +
@@ -233,6 +262,164 @@ function renderPortfolio() {
   html += '</div>';
 
   el.innerHTML = html;
+}
+
+// ─── POSITION DETAIL MODAL ──────────────────────────────
+function openPositionDetail(idx) {
+  var p = positions[idx];
+  if (!p) return;
+  var sp = stockPrices[p.ticker];
+  var stkPrice = sp ? sp.currentPrice : null;
+  var costBasis = p.cost;
+  var currentVal = stkPrice ? (p.qty * (stkPrice > p.strike ? stkPrice - p.strike : 0) * (p.optType === 'P' ? -1 : 1)) : null;
+  var pnl = currentVal !== null ? (currentVal - costBasis) : null;
+  var pnlPct = pnl !== null && costBasis > 0 ? ((pnl / costBasis) * 100) : null;
+  var mn = stkPrice ? moneyness(stkPrice, p.strike, p.optType) : { label: '--', cls: '' };
+  var mnLabel = mn.label;
+  if (p.dte <= 7 && stkPrice && !mn.label.startsWith('ITM')) mnLabel = 'EXPIRING';
+  
+  var html = '' +
+    '<div class="modal-handle"></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+      '<div>' +
+        '<div class="modal-title">' + p.ticker + ' ' + fmt(p.strike) + (p.optType === 'P' ? 'p' : 'c') + '</div>' +
+        '<div class="modal-sub">' + p.bucket + ' \xb7 ' + p.expiry + '</div>' +
+      '</div>' +
+      '<div style="text-align:right">' +
+        '<span class="badge" style="background:' + getBucketColor(p.bucket) + '22;color:' + getBucketColor(p.bucket) + ';font-size:11px;font-weight:700">' + p.bucket + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="modal-divider"></div>' +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Position Size</div>' +
+      '<div class="modal-value">' + p.qty + ' contracts @ ' + fmt(p.entry) + '</div>' +
+    '</div>' +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Cost Basis</div>' +
+      '<div class="modal-value">' + fmtCompact(costBasis) + '</div>' +
+    '</div>' +
+    (stkPrice ? '<div class="modal-section">' +
+      '<div class="modal-label">Stock Price</div>' +
+      '<div class="modal-value" style="color:' + getBucketColor(p.bucket) + '">' + fmt(stkPrice) + '</div>' +
+    '</div>' : '') +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Moneyness</div>' +
+      '<div class="modal-value">' + mnLabel + '</div>' +
+    '</div>' +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Days to Expiry</div>' +
+      '<div class="modal-value' + (p.dte <= 7 ? ' style="color:var(--red)"' : p.dte <= 14 ? ' style="color:var(--orange)"' : '') + '">' + p.dte + ' days</div>' +
+    '</div>' +
+    (pnl !== null ? '<div class="modal-divider"></div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div class="modal-label">P&amp;L</div>' +
+        '<div style="font-size:18px;font-weight:800;color:' + (pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' +
+          (pnl >= 0 ? '+' : '') + fmtCompact(pnl) +
+          (pnlPct !== null ? ' (' + pct(pnlPct) + ')' : '') +
+        '</div>' +
+      '</div>' : '') +
+    '<div class="modal-divider"></div>' +
+    '<div style="display:flex;gap:8px;margin-top:4px">' +
+      '<button class="btn" onclick="closeModal(event)" style="background:rgba(255,255,255,0.06);color:var(--text);font-size:13px">Close</button>' +
+    '</div>';
+  
+  openModal(html);
+}
+
+// ─── AGENDA RENDER ──────────────────────────────────────
+function renderAgenda() {
+  var el = $('agendaContent');
+  if (!agendaItems.length) {
+    el.innerHTML = '<div class="card"><div class="empty">No agenda items</div></div>';
+    return;
+  }
+  
+  var filtered = agendaFilter
+    ? agendaItems.filter(function(a) { return (a.priority || '').toUpperCase() === agendaFilter; })
+    : agendaItems;
+  
+  if (!filtered.length) {
+    el.innerHTML = '<div class="card"><div class="empty">No ' + (agendaFilter || '') + ' items</div></div>';
+    return;
+  }
+  
+  // Filter chips
+  var html = '' +
+    '<div class="agenda-filter">' +
+      '<div class="agenda-chip' + (!agendaFilter ? ' active' : '') + '" onclick="setAgendaFilter(null)">All</div>' +
+      '<div class="agenda-chip' + (agendaFilter === 'HIGH' ? ' active' : '') + '" onclick="setAgendaFilter(\'HIGH\')">HIGH</div>' +
+      '<div class="agenda-chip' + (agendaFilter === 'MEDIUM' ? ' active' : '') + '" onclick="setAgendaFilter(\'MEDIUM\')">MEDIUM</div>' +
+      '<div class="agenda-chip' + (agendaFilter === 'LOW' ? ' active' : '') + '" onclick="setAgendaFilter(\'LOW\')">LOW</div>' +
+    '</div>';
+  
+  html += '<div class="card"><div class="card-header">Action Items <span>' + filtered.length + '</span></div>';
+  for (var i = 0; i < filtered.length; i++) {
+    var a = filtered[i];
+    var prio = (a.priority || '').toUpperCase();
+    var prioColor = prio === 'HIGH' ? '#ff4444' : prio === 'MEDIUM' ? '#ffaa00' : prio === 'LOW' ? '#44cc44' : '#888';
+    var statIcon = (a.status || '').toLowerCase() === 'complete' ? '\u2713' :
+                   (a.status || '').toLowerCase() === 'cancelled' ? '\u2717' : '\u25CB';
+    
+    html += '<div class="agenda-item" onclick="openAgendaDetail(' + i + ',\' + (agendaFilter || 'all') + ')">' +
+      '<div class="agenda-priority-bar" style="background:' + prioColor + '"></div>' +
+      '<div class="agenda-body">' +
+        '<div class="agenda-top">' +
+          '<span class="agenda-status">' + statIcon + '</span>' +
+          '<span class="agenda-priority" style="color:' + prioColor + ';border-color:' + prioColor + '44">' + prio + '</span>' +
+          '<span class="agenda-category">' + (a.category || '') + '</span>' +
+          (a.ticker ? '<span class="agenda-tag">' + a.ticker + '</span>' : '') +
+        '</div>' +
+        '<div class="agenda-title">' + (a.title || '') + '</div>' +
+        '<div class="agenda-date">' + (a.created || '') + '</div>' +
+      '</div>' +
+      '<div class="agenda-arrow">\u203A</div>' +
+    '</div>';
+    if (i < filtered.length - 1) html += '<div class="divider"></div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+  $('agendaUpdated').textContent = nowStr();
+}
+
+// Store a copy of filtered agenda items for detail modal
+var _agendaDetailItems = [];
+var _agendaDetailFilter = null;
+
+function setAgendaFilter(prio) {
+  agendaFilter = prio;
+  renderAgenda();
+}
+
+function openAgendaDetail(idx, filterTag) {
+  // Find the actual agenda item from the source
+  var filtered = filterTag !== 'all'
+    ? agendaItems.filter(function(a) { return (a.priority || '').toUpperCase() === (filterTag || '').toUpperCase(); })
+    : agendaItems;
+  var a = filtered[idx];
+  if (!a) return;
+  
+  var prio = (a.priority || '').toUpperCase();
+  var prioColor = prio === 'HIGH' ? '#ff4444' : prio === 'MEDIUM' ? '#ffaa00' : prio === 'LOW' ? '#44cc44' : '#888';
+  
+  var html = '' +
+    '<div class="modal-handle"></div>' +
+    '<div class="modal-title">' + (a.title || '') + '</div>' +
+    '<div class="modal-sub">' +
+      '<span style="display:inline-block;padding:1px 6px;font-size:10px;font-weight:700;border-radius:4px;color:' + prioColor + ';background:' + prioColor + '22">' + prio + '</span>' +
+      ' \xa0\xa0' + (a.category || '') +
+      (a.ticker ? ' \xa0\xa0\xa0\xa0' + a.ticker : '') +
+    '</div>' +
+    '<div class="modal-divider"></div>' +
+    '<div class="modal-section">' +
+      '<div class="modal-label">Thesis &amp; Reasoning</div>' +
+      '<div class="modal-thesis">' + (a.thesis || 'No thesis provided') + '</div>' +
+    '</div>' +
+    '<div class="modal-divider"></div>' +
+    '<div style="display:flex;gap:8px;margin-top:4px">' +
+      '<button class="btn" onclick="closeModal(event)" style="background:rgba(255,255,255,0.06);color:var(--text);font-size:13px">Close</button>' +
+    '</div>';
+  
+  openModal(html);
 }
 
 function renderSignals() {
@@ -308,10 +495,11 @@ function renderTracker() {
 
 // ─── MAIN UPDATE ──────────────────────────────────────────
 function updateAll() {
-  return Promise.all([fetchDataJSON(), fetchSignalsCSV()])
+  return Promise.all([fetchDataJSON(), fetchSignalsCSV(), fetchAgendaJSON()])
     .then(function(results) {
       var json = results[0];
       var sigCSV = results[1];
+      agendaItems = results[2];
 
       if (json && json.length) {
         positions = parsePositions(json);
@@ -353,6 +541,7 @@ function updateAll() {
         if (tab === 'portfolio') renderPortfolio();
         else if (tab === 'signals') renderSignals();
         else if (tab === 'tracker') renderTracker();
+        else if (tab === 'agenda') renderAgenda();
       }
 
       $('lastUpdated').textContent = nowStr();
@@ -381,6 +570,7 @@ function renderActiveTab(name) {
   if (name === 'portfolio') renderPortfolio();
   else if (name === 'signals') renderSignals();
   else if (name === 'tracker') renderTracker();
+  else if (name === 'agenda') renderAgenda();
 }
 
 function openSettings() {

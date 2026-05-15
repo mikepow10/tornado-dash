@@ -52,6 +52,17 @@
   <div class="header"><h1>&#x1F4C8; Tracker</h1><div class="header-right"><span class="last-updated" id="trackerUpdated">&#x2014;</span></div></div>
   <div id="trackerContent"><div class="loading"><div class="spinner"></div>Loading prices...</div></div>
 </div>
+
+<!-- Agenda -->
+<div id="agendaTab" class="tab-content hide">
+  <div class="header"><h1>&#x2705; Agenda</h1><div class="header-right"><span class="last-updated" id="agendaUpdated">&#x2014;</span></div></div>
+  <div id="agendaContent"><div class="loading"><div class="spinner"></div>Loading agenda...</div></div>
+</div>
+</div>
+
+<!-- Detail Modal (used by Portfolio + Agenda) -->
+<div id="detailModal" class="modal-overlay hide" onclick="closeModal(event)">
+  <div class="modal-content" id="modalContent"></div>
 </div>
 
 <!-- Bottom Navigation -->
@@ -59,9 +70,10 @@
   <div class="tab active" data-tab="portfolio"><div class="tab-icon">&#x1F4CA;</div><div class="tab-label">Portfolio</div></div>
   <div class="tab" data-tab="signals"><div class="tab-icon">&#x26A1;</div><div class="tab-label">Signals</div></div>
   <div class="tab" data-tab="tracker"><div class="tab-icon">&#x1F4C8;</div><div class="tab-label">Tracker</div></div>
+  <div class="tab" data-tab="agenda"><div class="tab-icon">&#x2705;</div><div class="tab-label">Agenda</div></div>
   <div class="tab" data-tab="settings"><div class="tab-icon">&#x2699;&#xFE0F;</div><div class="tab-label">Settings</div></div>
 </nav>
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
